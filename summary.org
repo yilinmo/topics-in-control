@@ -1,0 +1,14 @@
+* Linear Algebra
+  - Invariant subspace
+  - Structured linear system, graph related topics
+* Optimization 
+  - Convex programming?
+  - Submodularity
+* Stochastic Process
+  - Convergence of random variables
+  - Large Deviation
+  - Martingale Theory: Martingale Convergence Theorem, Optional Sampling Theorem
+  - Optimal Filtering
+* Riccati Equation 
+  - properties of Riccati equation(monotonicity, contraction)
+  - Modified Algebraic Riccati equation
