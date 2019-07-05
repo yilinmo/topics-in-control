@@ -15,8 +15,42 @@ We can further define $\sum_i A_i S_i$ assuming $A_i$ are matrices.
 
 It is worth noticing that $(A_1+A_2)\mathcal S\subset A_1\mathcal S+A_2\mathcal S$. However, the equality may not necessarily hold. For example, let $\mathcal S = \{0,1\}$. Then $2\mathcal S = \{0,2\}$ but $\mathcal S+\mathcal S = \{0,1,2\}$. The equality sign holds if $\mathcal S$ is a convex set. In particular, if $\mathcal S$ is a subspace.
 
-* Invariance Subspace and Observability
+* (Positively) Invariance Set
+
+Consider the following dynamic system 
+$$x(k+1) = f(x(k)),\,x(k) \in \mathcal X.$$
+
+We define a set $\mathcal S \subset \mathcal X$ to be (positively) invariant if for any $x \in \mathcal S$, $f(x)\in \mathcal S$. In other words, $f(\mathcal S)\subset \mathcal S$.
+
+If $\{\mathcal S_i\}$ is invariant, then $\bigcup_i \mathcal S_i$ and $\bigcap_i \mathcal S_i$ is invariant. Furthermore, clearly $\mathcal X$ and $\{0\}$ is invariant. Hence, for any set $\mathcal S$, the exists a maximal invariant set contained in $\mathcal S$ and a minimal invariant set containing $\mathcal S$.
+
+Now suppose $\mathcal S$ is invariant. If $x(0)\in \mathcal S$, then we can prove that all the subsequent $x(k)\in \mathcal S$ by induction.
+
+Conversely, suppose that $x(k),\,k=0,\ldots$ constitutes a trajectory of the dynamical system. Then the set $\{x(k)\}$ is invariant by definition. 
+
+The concept of invariant set is very important for constraints satisfaction. Suppose that we would like to enforce the state $x(k)$ to stay in some safe set $\mathcal S$ for all time $k$. It is possible that although $x(0)$ is insider $\mathcal S$, the subsequent $x(k)$ will go out of the set. For example, if we consider the system
+
+$$f(x) = \max(2x-1,0),\,x \in \mathbb R_+.$$
+
+Suppose the safe set is $\mathcal S = [0,2)$, then for the initial condition $x(0) = 1 + 2^{-n}$, the trajectory will stay in $\mathcal S$ for the first $n$ step. However, $x(n) = 2$ will go outside the safe set.
+
+As a result, we need to put a stronger condition on the initial condition $x(0)$. It turns out to be the maximal invariant set is precisely the right constraint to put on the initial condition:
+
+Theorem: $x(k) \in \mathcal S$ for all $k$ if and only if $x(0)\in \mathcal S_*$, where $\mathcal S_*$ is the maximal invariant set contained in $\mathcal S$.
+
+Proof: /"if"/: $x(0)\in \mathcal S_*$ implies that $x(k)\in \mathcal S_*$ for all $k$, which implies that $x(k) \in \mathcal S$ for all $k$.
+ /"only if"/: Suppose that $x(k)\in \mathcal S$ for all $k$, then $\{x(k)\}$ is an invariant set contained in $\mathcal S$, which means it is contained in the maximal invariant set $\mathcal S_*$.
+
+Consider the previous example, one can prove that $[0,1]$ is the maximal invariant set contained in $[0,2)$ and hence $0\leq x(0)\leq 1$ is the precise requirement for $x(k)$ to stay in $[0,2)$the maximal invariant set contained in $[0,2]$ and hence $0\leq x(0)\leq 1$ is the precise requirement for $x(k)$ to stay in $[0,2)$.
+
+It is worth noticing that any level set of Lyapunov function is an invariant set.
+
+** Linear System and Invariance Subspace 
+We shall now consider a special case of $f$, where $f(x) = Ax$ is linear. In this context, it is more natural to talk about invariant subspace other than invariant set. 
+
 Let $A$ be a linear mapping from $\mathbb R^n$ to $\mathbb R^n$ and $\mathcal V$ be a subspace of $\mathbb R^n$ (or $\mathcal C^n$). Then $\mathcal V$ is a invariant subspace of $A$ if $A\mathcal V \in \mathcal V$.
+
+For linear systems, one can prove that the linear span of any invariant set is an invariant subspace. This also implies that the linear span of any trajectory $\{x(k)\}$ is an invariant set.
 
 Important properties:
 1. If $\mathcal V_i$ are invariant subspaces, then $\sum_{i} \mathcal V_i$ and $\cap_i \mathcal V_i$ are invariant as well.
@@ -36,7 +70,7 @@ Algorithm: Let $\mathcal V_0 = \mathcal V$ and $\mathcal V_{i+1} = A\mathcal V_{
 
 $$\mathcal V_0\subset \mathcal V_1\subset\ldots\subseteq \mathcal V_i = \mathcal V_{i+1} = \ldots.$$
 
-As a result, $ A\mathcal V_{i}\subset \mathcal V_{i+1} =\mathcal V_i$, which proves $\mathcal V_i$ is invariant. It is easy to see that it also contains $\mathcal V$.
+As a result, $A\mathcal V_{i}\subset \mathcal V_{i+1} =\mathcal V_i$, which proves $\mathcal V_i$ is invariant. It is easy to see that it also contains $\mathcal V$.
 
 To prove $\mathcal V_i$ is minimal, notice that any invariant subspace $\mathcal V^*$ containing $\mathcal V$ must have
 
@@ -48,7 +82,53 @@ Similarly, the maximal invariant subspace contained in $\mathcal V$ can be compu
 
 $$\mathcal V_0 = \mathcal V,\,\mathcal V_{i+1} = A^{-1}\mathcal V_i \bigcap \mathcal V.$$
 
-* Conditioned Invariant Subspace and Unknown Input Observer
+Notice that for general non-linear function $f$, calculating the maximal or minimal invariant set is a non-trivial task.
 
-* Invariant Set for General Cases
-  The concept of invariant set i
+** Observability 
+
+We can now characterize observability using the concept of minimal invariant set.
+
+To see the relationship between observability and constraint satisfaction, notice that a system is unobservable, if we can find a non-zero $x(0)$, such that $Cx(k) = 0$ for all $k$, i.e., $x(k) \in ker(C)$ for all $k$.
+  
+As a result, a system is observable if and only if the maximal invariant subspace contained in $ker(C)$ is $\{0\}$.
+
+* Controlled Invariant Set
+The dynamical system considered before do not have any control input. Now consider the following systems:
+
+$$x(k+1) = f(x(k), u(k)). x(k)\in \mathcal X,\,u(k)\in \mathcal U.$$ 
+
+Then a set $\mathcal S$ is called controlled invariant if for any $x \in \mathcal S$, we can find a control input $u$, such that $f(x,u)\in \mathcal S$.
+
+Notice that if $\mathcal S_i$ is controlled invariant, then the union is also controlled invariant. However, the intersection of all $\mathcal S_i$ may fail to be invariant. To see an example, consider the following dynamical system
+$$x(k+1) = x(k)+1/u(k),\,x(k) , u(k)\in\mathbb R.$$
+Any interval $\mathcal S_i=  [-1/i, 1/i]$ ($\epsilon > 0$) is controlled invariant. However, $\{0\}$ is not controlled invariant.
+
+Similar to the control-free case, one can prove that there exists a sequence of control input $u(k)$, such that $x(k)$ stays in same safe set $\mathcal S$ for all $k$, if and only if $x(0)$ belongs to the maximal controlled invariant set $\mathcal S_*$ contained in $\mathcal S$. 
+
+** Controlled Invariant Subspace 
+   
+Consider $x(k+1) = Ax(k) + Bu(k)$. A subspace $\mathcal V$ is called controlled invariant if for any $x \in \mathcal V$, there exists a $u$, such that $Ax + Bu \in \mathcal V$. The span of any controlled invariant set will be controlled invariant subspace due to linearity and hence the span of any trajectory is controlled invariant.
+
+Notice the controlled invariant condition can also be written as $Ax \in \mathcal V + \mathcal B$, where $\mathcal B$ is the span of the $B$ matrix. In other words, $A\mathcal V \subset \mathcal V + \mathcal B$.
+
+Notice that we only require the existence of a $u$. One could restrict that $u = Fx$ is a linear function of $x$. Hence, $\mathcal V$ is controlled invariant if there exists an $F$ matrix, s.t., $Ax+Bu = (A+BF)x \in \mathcal V$, i.e., $(A+BF)\mathcal V \subset \mathcal V$. Surprisingly, this condition is also necessary. Suppose $\mathcal V$ is controlled invariant, and $x_1,\ldots, x_l$ forms a basis of $\mathcal V$, then we know there exists $u_1,\ldots, u_l$, such that $Ax_i + Bu_i \in \mathcal V$. Now for any $x \in \mathcal V$, $x$ can be uniquely decomposed into $x = \sum_{i=1}^l \alpha_i x_i$. By linearity, $Ax+ Bu \in \mathcal V$, where $u = \sum_{i=1}^l \alpha_i u_i$. This implies that in order to force the state to stay in certain subspace, it is sufficient to use a linear controller. 
+
+Similar to the control-free case, one can prove that there exists a maximal controlled invariant subspace $\mathcal V_*$ contained in any subspace $\mathcal V$, which is the fixed point of the following recursive equations:
+
+$$\mathcal V_0 = \mathcal V,\,\mathcal V_{i+1} = \mathcal V\bigcap A^{-1}\left(\mathcal V_i + \mathcal B\right).$$
+
+** Unknown Input Observer and Fault Detection
+Consider the following linear system 
+
+$$x(k+1) = Ax(k)+Bu(k),\,y(k) = Cx(k).$$   
+
+We want to determine if there exists an initial condition $x(0)$ and a sequence of control input $u(k)$, such that the output $y(k) =0$ for all $k$. In other words, $y(k)\in Ker(C)$.
+
+This is equivalent to the maximal controlled invariant subspace contained in $Ker(C)$ is $\{0\}$. 
+
+Suppose that the maximal controlled invariant subspace contained in $Ker(C)$ is non-trivial. Then there exists $F$, such that $(A+BF)\mathcal V \subset \mathcal V$. As a result, there exists $x \in \mathcal V$, which is the eigenvector of $A+BF$ corresponding to eigenvalue $\lambda$. Hence, $x$ and $u = Fx$ solves the following equations:
+$$Ax + Bu = \lambda x,\,Cx = 0,$$
+which implies that $\begin{bmatrix}A-\lambda I&B\\C&0\end{bmatrix}$ has a non-trivial kernel.
+
+
+
