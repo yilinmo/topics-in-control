@@ -1,0 +1,54 @@
+* Image and Inverse Image of a Set
+Let $\mathcal S\subset \mathcal X$ be any set,  and $f:\mathcal X \rightarrow \mathcal Y$. Then we define the image of $\mathcal S$ to be:
+$$f(\mathcal S) \triangleq \{y\in\mathcal Y:\exists x\in \mathcal S,\,s.t.\,y=f(x)\}.$$
+
+On the other hand, let $\mathcal R\subset \mathcal Y$, then we define the inverse image of $\mathcal R$ to be:
+$$f^{-1}(\mathcal R)\triangleq \{x\in \mathcal X:f(x)\in\mathcal R\}.$$
+Notice that $f$ may not necessarily be invertible ($f$ may not be a bijection from $\mathcal X$ to $\mathcal Y$). Hence, $f^{-1}$ may not be a function from $\mathcal Y$ to $\mathcal X$.
+
+If $f(x) = Ax$ is a linear function of $x$, then we will simply write $f(\mathcal S)$ as $A\mathcal S$ and $f^{-1}(\mathcal R) = A^{-1}\mathcal R$. Notice that $A$ may not be invertible. Hence, $2\mathcal S$ is equivalent to $f(\mathcal S)$ for $f(x) = 2x$.
+
+Furthermore, for $\mathcal S_1,\mathcal S_2 \subset \mathcal X$, we shall define $\mathcal S_1 + \mathcal S_2$ as
+$$\mathcal S_1 + \mathcal S_2 = \{x\in\mathcal X:\exists x_i\in \mathcal S_i,\,s.t.\,x_1+x_2 = x\}.$$
+
+We can further define $\sum_i A_i S_i$ assuming $A_i$ are matrices. 
+
+It is worth noticing that $(A_1+A_2)\mathcal S\subset A_1\mathcal S+A_2\mathcal S$. However, the equality may not necessarily hold. For example, let $\mathcal S = \{0,1\}$. Then $2\mathcal S = \{0,2\}$ but $\mathcal S+\mathcal S = \{0,1,2\}$. The equality sign holds if $\mathcal S$ is a convex set. In particular, if $\mathcal S$ is a subspace.
+
+* Invariance Subspace and Observability
+Let $A$ be a linear mapping from $\mathbb R^n$ to $\mathbb R^n$ and $\mathcal V$ be a subspace of $\mathbb R^n$ (or $\mathcal C^n$). Then $\mathcal V$ is a invariant subspace of $A$ if $A\mathcal V \in \mathcal V$.
+
+Important properties:
+1. If $\mathcal V_i$ are invariant subspaces, then $\sum_{i} \mathcal V_i$ and $\cap_i \mathcal V_i$ are invariant as well.
+2. Trivial subspace of $\mathbb R^n$, i.e., $\mathbb R^n$ and $\{0\}$, are always invariant.
+
+Conclusion: For any subset $\mathcal V\subset \mathbb R^n$, There exists a maximal invariant subspace contained in $\mathcal V$ and a minimal invariant subspace containing $\mathcal V$.
+
+Proof: Let $\{\mathcal V_i\}_{i\in\mathcal I}$ be the collection of invariant subspaces contained in $\mathcal V$. This set is non-empty since $\{0\}$ is invariant and $\{0\}$ is contained in $\mathcal V$. Define
+
+$$\mathcal V^* = \sum_{i\in\mathcal I}\mathcal V_i. $$
+
+Then $\mathcal V^*$ is invariant and maximal.
+
+The existence of the minimal invariant subspace can be proved by taking the intersections of all invariant subspaces containing $\mathcal V$.
+
+Algorithm: Let $\mathcal V_0 = \mathcal V$ and $\mathcal V_{i+1} = A\mathcal V_{i} + \mathcal V$. Clearly we have $\mathcal V_0\subset \mathcal V_1$ and if $\mathcal X \subset \mathcal Y$, then $A\mathcal X + \mathcal V\subset A\mathcal Y+\mathcal V$. Hence, we know that $\mathcal V_0\subset \mathcal V_1\subset\ldots$ is an increasing sequence. Since $\mathbb R^n$ is finite dimensional, we must have $\mathcal V_{i+1} = \mathcal V_i$ for some $i \leq n-1$ (since every time if $\mathcal V_i$ is a proper subspace of $\mathcal V_{i+1}$, then the dimension of $\mathcal V_{i+1}$ is at least the dimension of $\mathcal V_i$ plus $1$. Notice that this can also be proved using Cayley-Hamilton theorem), which implies that
+
+$$\mathcal V_0\subset \mathcal V_1\subset\ldots\subseteq \mathcal V_i = \mathcal V_{i+1} = \ldots.$$
+
+As a result, $ A\mathcal V_{i}\subset \mathcal V_{i+1} =\mathcal V_i$, which proves $\mathcal V_i$ is invariant. It is easy to see that it also contains $\mathcal V$.
+
+To prove $\mathcal V_i$ is minimal, notice that any invariant subspace $\mathcal V^*$ containing $\mathcal V$ must have
+
+$$A\mathcal V^* + \mathcal V \subseteq \mathcal V^*.$$
+
+As a result, by the monotonicity of the function $\mathcal X \rightarrow A\mathcal X+\mathcal V$, we know that $\mathcal V^*$ contains $\mathcal V_i$.
+
+Similarly, the maximal invariant subspace contained in $\mathcal V$ can be computed as 
+
+$$\mathcal V_0 = \mathcal V,\,\mathcal V_{i+1} = A^{-1}\mathcal V_i \bigcap \mathcal V.$$
+
+* Conditioned Invariant Subspace and Unknown Input Observer
+
+* Invariant Set for General Cases
+  The concept of invariant set i
