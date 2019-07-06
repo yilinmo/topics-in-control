@@ -1,0 +1,281 @@
+\documentclass{article}
+
+\usepackage{subfigure}
+\usepackage{amssymb, amsmath, amsfonts}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usetikzlibrary{external}
+\usepackage{pgfplots}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+
+\newlength\figureheight
+\newlength\figurewidth
+
+\ifnum\pdfshellescape=1
+\tikzexternalize[prefix=tikzpdf/]
+\fi
+
+\newcommand{\tikzdir}[1]{tikz/#1.tikz}
+\newcommand{\inputtikz}[1]{\tikzsetnextfilename{#1}\input{\tikzdir{#1}}}
+
+\DeclareMathOperator*{\argmin}{arg\; min}     % argmin
+\DeclareMathOperator*{\argmax}{arg\; max}     % argmax
+\DeclareMathOperator*{\tr}{tr}     % trace
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\logdet}{log\;det}
+
+\newif\ifcomment
+%display the comments
+\commenttrue
+%do not display the comments, used for the submitted version
+%\commentfalse
+\ifcomment
+\newcommand{\comment}[1]{\textcolor{blue}{#1}}
+\else
+\newcommand{\comment}[1]{}
+\fi
+\title{Generic Properties of Linear Structured System}
+
+\author{Yilin Mo}
+
+\begin{document} \maketitle
+
+Consider the space of $n$ by $n$ matrix $\mathbb R^{n\times n}$. We can define the canonical basis $E_{i,j}$ as an all zero matrix except the $i$th row and $j$th column to be one.
+
+Let us consider a subspace $U\subseteq \mathbb R^{n\times n}$, such that $U = span(E_{i_1,j_1},\dots,E_{i_l,j_l})$.
+
+We know that any matrix $X \in U$ can be written as
+\begin{displaymath}
+  X = \sum_{k=1}^l\lambda_k E_{i_k,j_k}.
+\end{displaymath}
+
+Hence, there is a one to one correspondence between $X$ and $\mathbb R^l$.
+
+We will call $U$ a ``structured matrix''.
+
+Define
+\begin{displaymath}
+ \det(\Lambda) = \left|\sum_{k=1}^l \lambda_k E_{i_k,j_k}\right| 
+\end{displaymath}
+\begin{theorem}
+  Let $U$ be a ``structured matrix''. Define the set
+  \begin{displaymath}
+    S = \{\Lambda\in \mathbb R^l:\det(\Lambda) =0\} 
+  \end{displaymath}
+  Then one of the following statements hold:
+  \begin{itemize}
+    \item $S = \mathbb R^l$.
+    \item $S$ is nowhere dense in $\mathbb R^l$ and has Lebesgue measure $0$. $\mathbb R^l \backslash S$ is open.
+  \end{itemize}
+\end{theorem}
+\begin{proof}
+  Suppose that there exists $\Lambda^*$, such that
+  \begin{displaymath}
+    \det\left( \Lambda^* \right) \neq 0. 
+  \end{displaymath}
+
+For any $\Lambda $, consider the following function:
+\begin{displaymath}
+  f(t) = \det\left[ (1-t)\Lambda + t \Lambda^* \right].
+\end{displaymath}
+We know that $f(t)$ is at most an $n$th-polynomial of $t$ and $f(0) = \det\left( \Lambda \right)$ and $f(1) = \det(\Lambda^*)\neq 0$.
+
+Therefore, $f\neq 0$ and there is at most $n$ roots for $f(t)$. Hence, for any $r > 0$, there exists a $|t| < r$, such that $f(t)\neq 0$.
+
+Notice that $\det(\Lambda)$ is continuous with respect to $\Lambda$. Hence, $\mathbb R^l\backslash S = \det^{-1}((-\infty,0)\bigcup(0,\infty) )$ is open. Thus, $S$ is closed and has no interior. Thus, $S$ is nowhere dense.
+
+In fact, $S$ is a proper algebraic variety. The $0$ Lebesgue measure of $S$ can be proved using the properties of algebraic variety.
+\end{proof}
+
+The above theorem essentially implies that a zero-one phenomenon regarding invertibility:
+\begin{itemize}
+  \item Either all matrices in $U$ are not invertible;
+  \item or almost all matrices in $U$ are invertible.
+\end{itemize}
+
+Consider the set of stable matrices in $U$, one can easily prove that in fact some matrices in $U$ are stable, some are not. (assuming that $U$ is non-trivial).
+
+Hence, invertibility only depends on the structure of $U$ (generic properties), while stability depends on the exact parameterization. 
+
+For any ``structured matrix'' $U$, we can define the graph associated with $U$ as $G(U) = (V,E)$, where $V = \{1,\dots,n\}$ and $(i,j)\in E$ if and only if $E_{i,j}\in U$. The graph there is a one-to-one correspondence between $G(U)$ and $U$. Hence, any generic properties can be derived from $G(U)$.
+
+Let us define a simple path as a path without repetitions of vertices or edges. Two paths are disjoint if they do not share any common vertex. A family of paths are disjoint if and only any two paths are disjoint.
+
+Similarly, we can define simple cycle and disjoint cycles. In the remaining lecture, we will only consider simple paths and simple cycles.
+
+\begin{theorem}
+  A structured matrix $U$ is generically invertible if and only if there exists a family of disjoint cycles in $G(U)$ that covers all vertices $V$.
+\end{theorem}
+\begin{proof}
+  If $U$ is generically invertible, then there exists an $X\in U$ that is invertible.
+
+  Let $\sigma = (\sigma_1,\dots,\sigma_n)$ be a permutation of $(1,\dots,n)$, we know that
+  \begin{displaymath}
+    \det(X) = \sum_{\sigma} sgn(\sigma) \prod_{i=1}^n X_{i,\sigma_i}\neq 0
+  \end{displaymath}
+
+  Hence, there exists at least one $\sigma$, such that $X_{i,\sigma_i}\neq 0$ for all $i=1,\dots,n$. We claim that the edge set $(i,\sigma_i)$ forms a family of disjoint cycles that covers $V$.
+
+  On the other hand, if the edge set $\{(i_k,j_k)\}$, $k=1,\dots,n$ forms a family of disjoint cycles that covers $V$, then we can define 
+\begin{displaymath}
+  X_{ij} = \begin{cases}
+    1&\text{ if } (i,j)=(i_k,j_k)\text{ for some }k\\
+    0&\text{ otherwise}
+  \end{cases}
+\end{displaymath}
+We claim that $\det(X) = 1$ or $-1$. Hence, $U$ must be generically invertible.
+\end{proof}
+
+
+Alternatively, we can construct a bipartite graph $G'(U) = (V',E')$, where $V' = \{i_1,\dots,i_n,o_1,\dots,o_n\}$, such that
+\begin{displaymath}
+  (i_a,o_b)\in E' \Leftrightarrow E_{a,b}\in U. 
+\end{displaymath}
+
+A matching of a graph is defined as a family of disjoint edges. $U$ is generically invertible if and only if there exists a matching with size $n$.
+
+We can generalize the graph $G'(U)$ to non-square matrices. The generic rank of $U$ is given by the size of the maximum matching.
+\section{Structured Linear System}
+Consider the following linear system
+\begin{displaymath}
+ x(k+1) = A x(k) + B u(k),\, y(k) = C x(k) + D u(k), 
+\end{displaymath}
+where $A,B,C,D$ are all structured matrices. $x(k)\in \mathbb R^n$, $y(k)\in \mathbb R^m$ and $u(k)\in \mathbb R^p$. We can define the graph $G(A,B,C,D) = (V,E)$ of the system as
+\begin{itemize}
+  \item $V = \{u_1,\dots,u_p, x_1,\dots,x_n,y_1,\dots,y_m\}$. 
+  \item $(x_i,x_j)\in E$ if and only if $A_{i,j}$ is a free parameter.
+  \item $(x_i,u_j)\in E$ if and only if $B_{i,j}$ is a free parameter.
+  \item $(y_i,x_j)\in E$ if and only if $C_{i,j}$ is a free parameter.
+  \item $(y_i,u_j)\in E$ if and only if $D_{i,j}$ is a free parameter.
+\end{itemize}
+Any generic properties of the system can be derived from the graph $G(A,B,C,D)$.
+
+Controllability(Observability) is a generic property, since we are checking the invertibility of
+\begin{displaymath}
+  \mathcal B = \begin{bmatrix}
+    B&AB&\dots&A^{n-1}B
+  \end{bmatrix}.
+\end{displaymath}
+Every entries in $\mathcal B$ is a polynomial of parameters. Hence, the determinant of a submatrix is also a polynomial of parameters. By the same argument as the square matrix case, we know that the invertibility of $\mathcal B$ is a generic property.
+
+\begin{theorem}
+  If one of the following conditions holds:
+  \begin{enumerate}
+    \item $rank\begin{bmatrix} A & B\end{bmatrix} < n$, 
+    \item There exists a permutation matrix $P$, such that
+      \begin{displaymath}
+	PAP^{-1} = \begin{bmatrix}
+	  A_{11}& 0\\
+	  A_{21}&A_{22}
+	\end{bmatrix},\, PB = \begin{bmatrix}
+	  0\\
+	  B_2
+	\end{bmatrix}
+      \end{displaymath},
+  \end{enumerate}
+  then $(A,B)$ is not observable.
+\end{theorem}
+\begin{proof}
+  If $\begin{bmatrix} A&B\end{bmatrix}$ is not full rank, then there exists $v\neq 0$, such that
+    \begin{displaymath}
+     v^TA = v^T B = 0, 
+    \end{displaymath}
+    which implies that $v^TA^k B = 0$. Hence, $\mathcal B$ is not full rank.
+
+    On the other hand, if the second conditions hold, then we can choose $v = \begin{bmatrix} \mathbf 1 \\0  \end{bmatrix}$, then $v^TA^k = \begin{bmatrix} \mathbf 1^T A_{11} & 0\end{bmatrix}$. Thus, $v^TA^kB = 0$, for all $k$ and $\mathcal B$ is not full rank.
+\end{proof}
+
+\begin{theorem}
+  The generic rank of $\begin{bmatrix} A&B\end{bmatrix} = n$ if and only if there exists a disjoint family of
+    \begin{enumerate}
+      \item cycles,
+      \item paths that start from some $u_j$,
+    \end{enumerate}
+    which covers the vertices $x_1,\dots,x_n$.
+\end{theorem}
+
+\begin{theorem}
+  Condition 2 holds if and only if there exists an vertex $x_i$ that cannot be reached from any $u_j$.
+\end{theorem}
+
+Thus we know that
+\begin{theorem}
+  $(A,B)$ is generically controllable implies that 
+  \begin{enumerate}
+    \item every vertex $x_i$ can be reached from some $u_j$, 
+    \item and all vertices $x_1,\dots,x_n$ are covered by a disjoint family of cycles and paths that starts from some $u_j$.
+  \end{enumerate}
+  \label{theorem:genericcontrollability}
+\end{theorem}
+We can prove that the converse in Theorem~\ref{theorem:genericcontrollability} is also true. 
+
+Examples:
+\begin{enumerate}
+  \item \begin{displaymath}
+  A = \begin{bmatrix}
+    a_{11}&a_{12}&0\\
+    a_{21}&a_{22}&0\\
+    a_{31}&a_{32}&a_{33}
+  \end{bmatrix},\,B = \begin{bmatrix}
+    0\\
+    0\\
+    b_{31}
+  \end{bmatrix}
+\end{displaymath}
+Not controllable since $x_1,x_2$ are not connected to $u_1$.
+\item \begin{displaymath}
+  A = \begin{bmatrix}
+    0&a_{12}&0\\
+    0&a_{22}&0\\
+    0&a_{32}&0
+  \end{bmatrix},\,B = \begin{bmatrix}
+    b_{11}\\
+    b_{21}\\
+    b_{31}
+  \end{bmatrix}
+\end{displaymath}
+Not controllable since we cannot cover $x_1,x_3$ simultaneously with disjointed paths.
+\item \begin{displaymath}
+  A = \begin{bmatrix}
+    0&a_{12}&0&\dots& 0\\
+    0&0&a_{23}&\dots&0\\
+    \vdots&\vdots&\vdots&\ddots&\vdots\\
+    0&0&0&\dots&a_{n-1,n}\\
+    0&0&0&\dots&0\\
+  \end{bmatrix},\,B = \begin{bmatrix}
+    0\\
+    \vdots\\
+    b_{n1}
+  \end{bmatrix}
+\end{displaymath}
+Generically controllable. The corresponding graph is called a ``stem''.
+\item \begin{displaymath}
+  A = \begin{bmatrix}
+    0&a_{12}&0&\dots& 0\\
+    0&0&a_{23}&\dots&0\\
+    \vdots&\vdots&\vdots&\ddots&\vdots\\
+    0&0&0&\dots&a_{n-1,n}\\
+    a_{n1}&0&0&\dots&0\\
+  \end{bmatrix},\,B = \begin{bmatrix}
+    0\\
+    \vdots\\
+    b_{n1}
+  \end{bmatrix}
+\end{displaymath}
+Generically controllable. The corresponding graph is called a ``bud''.
+\end{enumerate}
+
+
+\end{document}
+
+
+
+

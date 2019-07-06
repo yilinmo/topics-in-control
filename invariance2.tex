@@ -1,0 +1,230 @@
+\documentclass{article}
+
+\usepackage{subfigure}
+\usepackage{amssymb, amsmath, amsfonts}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usetikzlibrary{external}
+\usepackage{pgfplots}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+
+\newlength\figureheight
+\newlength\figurewidth
+
+\ifnum\pdfshellescape=1
+\tikzexternalize[prefix=tikzpdf/]
+\fi
+
+\newcommand{\tikzdir}[1]{tikz/#1.tikz}
+\newcommand{\inputtikz}[1]{\tikzsetnextfilename{#1}\input{\tikzdir{#1}}}
+
+\newcommand{\y}{{\mathcal Y}}
+\renewcommand{\u}{{\mathcal U}}
+\DeclareMathOperator*{\argmin}{arg\; min}     % argmin
+\DeclareMathOperator*{\argmax}{arg\; max}     % argmax
+\DeclareMathOperator*{\tr}{tr}     % trace
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\logdet}{log\;det}
+\DeclareMathOperator{\col}{col}
+
+\newif\ifcomment
+%display the comments
+\commenttrue
+%do not display the comments, used for the submitted version
+%\commentfalse
+\ifcomment
+\newcommand{\comment}[1]{\textcolor{blue}{#1}}
+\else
+\newcommand{\comment}[1]{}
+\fi
+\title{Secure Control: Intrusion Detection and Identification}
+
+\author{Yilin Mo}
+
+\begin{document} \maketitle
+\section{Fault Detection and Identification}
+\subsection{Detection}
+Consider the following system:
+\begin{align}
+  x(k+1) = A x(k) + B u(k),\, y(k) = C x(k).
+  \label{eq:ltisystem1}
+\end{align}
+We assume that $(A,C)$ is observable, $B$ is full column rank. Suppose that $u(k)$ is the fault signal. We will say that a fault occurs when $u(k) \neq 0$ for some $k$.
+
+Define $\y = (y(0),y(1),\dots)$ and $\u = (u(0),u(1),\dots)$. Clearly, $\y$ is a function of $x(0)$ and $\u$. Thus, we will write
+\begin{align*}
+ y = f(x(0),\u). 
+\end{align*}
+
+Fact: $f$ is a linear operator.
+
+\comment{Question: Can we know whether a fault occurs from $y(k)$?}
+
+There are two cases depending whether we know $x(0)$ or not. 
+
+Suppose that $x(0)$ is known. Then the nominal trajectory is given by
+\begin{align*}
+ \y^* = f(x(0),0). 
+\end{align*}
+
+On the other hand, if there exists a $\u\neq 0$, such that 
+\begin{align*}
+ \y^* = f(x(0),\u), 
+\end{align*}
+then there is no way for us to know whether there is a fault or not given $y^*$. Notice that
+\begin{align*}
+ \y^* = f(x(0),0) = f(x(0),\u) \Rightarrow f(0,\u) = 0,
+\end{align*}
+which gives the following theorem:
+\begin{theorem}
+  The following statements are equivalent:
+  \begin{enumerate}
+    \item The fault is detectable with known initial conditions. 
+    \item The following implication holds:
+      \begin{align*}
+	f(0,\u)=0\implies \u=0
+      \end{align*}
+    \item The system is left-invertible, i.e., the mapping from $\u$ to $\y$ defined by $\y = f(0,\u)$ is one to one.
+  \end{enumerate}
+  \label{eq:detectabilityknowninit}
+\end{theorem}
+
+If the initial condition is unknown, then the nominal trajectory will be a set of
+\begin{align*}
+  Y^* = \{\y:\y=f(x(0),0)\text{ for some }x(0)\in \mathbb R^n\}. 
+\end{align*}
+By the similar argument, if there exists a $\u$ and $x(0)'$, such that 
+\begin{align*}
+ \y = f(x(0)',\u) \in Y^*,
+\end{align*}
+then there is no way to know whether a fault occurs or not given $\y$. By linearity of $\y$, we know that
+\begin{align*}
+ \y = f(x(0),0) = f(x(0)',\u) \implies f(x(0)'-x(0),\u) = 0, 
+\end{align*}
+which leads to the following theorem:
+\begin{theorem}
+  The following statements are equivalent:
+  \begin{enumerate}
+    \item The fault is detectable with unknown initial conditions. 
+    \item The following implication holds:
+      \begin{align*}
+	f(x(0),\u)=0\implies x(0)=0\text{ and }\u=0.
+      \end{align*}
+    \item The system has no non-trivial zero dynamics (strongly observable), i.e.,
+      \begin{align*}
+	f(x(0),\u) = 0 \implies x(k) = 0,\,\forall k.
+      \end{align*}
+    \item The system does not have an invariant zero, i.e., there does not exists an $z\in \mathbb C$, and non-zero $x_0\in\mathbb R^n$ and $u_0\in\mathbb R^m$, such that
+      \begin{align}
+	Ax_0 + B u_0 = zx_0,\text{ and } Cx_0=0.
+	\label{eq:invariantzero}
+      \end{align}
+  \end{enumerate}
+\end{theorem}
+\begin{proof}
+  We will only prove $3\implies 2$. Suppose that there exists $x(0)$ and $\u\neq 0$, such that $f(x(0),\u) = 0$. Let us define the subspace $\mathcal V\in \mathbb R^n$ as
+  \begin{align*}
+    \mathcal V \triangleq \text{span}(x(0),x(1),\dots,).
+  \end{align*}
+  $\mathcal V \neq \{0\}$. Since 
+  \begin{align*}
+   Ax(k) = x(k+1) -  B u(k),
+  \end{align*}
+ we know that
+ \begin{align}
+  A\mathcal V \subseteq \mathcal V + \col(B) ,
+  \label{eq:controlledinvariant}
+ \end{align}
+ where $\col(B)$ is the column space of $B$. Furthermore,
+ \begin{align*}
+  C\mathcal V = 0 \implies \mathcal V\subseteq \ker(C), 
+ \end{align*}
+ where $\ker(C)$ is the null space of $C$. By \eqref{eq:controlledinvariant}, we know that there exists an $K$, such that
+ \begin{align*}
+  (A+BK)\mathcal V \subseteq \mathcal V.
+ \end{align*}
+ Hence, there exists $x_0 \in \mathcal V$, which is an eigenvector of $A+BK$ with corresponding eigenvalue $z$. Define $u_0 = Kx_0$, then $z,x_0,u_0$ satisfies \eqref{eq:invariantzero}.
+\end{proof}
+
+\begin{remark}
+  The system is called strongly detectable if the following implication holds:
+  \begin{align*}
+   f(x(0),\u) = 0\implies x(k)\rightarrow 0. 
+  \end{align*}
+  This implies that even there might exists an undetectable attack, the effect of the attack on the state is decaying over time. One can prove that a system is strongly detectable if and only if all the invariant zeros of the system are stable.
+\end{remark}
+
+\subsection{Identification}
+Consider the following system:
+\begin{align}
+  x(k+1) = A x(k) + \sum_{i\in \mathcal I}B_i u_i(k),\, y(k) = C x(k),
+  \label{eq:ltisystem2}
+\end{align}
+where $u_i(k)$ denotes the $i$th fault and we say it occurs if $u_i(k)\neq 0$ for some $k$. We assume that at most one fault occurs and we want to identify which one.
+
+Suppose that $x(0)$ is known, then all possible trajectories generated by the $i$th fault can be written as
+\begin{align*}
+  Y_i = \{\y:\y = f(x(0), B_i\u_i)\},
+\end{align*}
+where $B_i \u_i = (B_i u_i(0),B_iu_i(1),\dots)$. We claim that we can distinguish the $i$th fault and the $j$th fault if 
+\begin{align*}
+ \y = f(x(0),B_i\u_i) =  f(x(0),B_j\u_j)\implies \u_i = \u_j = 0.
+\end{align*}
+Notice that
+\begin{align*}
+  f(x(0),B_i\u_i) =  f(x(0),B_j\u_j)\Leftrightarrow f\left(0,\begin{bmatrix}B_i &B_j\end{bmatrix}\begin{bmatrix}\u_i\\-\u_j\end{bmatrix}\right)=0.
+\end{align*}
+Therefore, the fault is identifiable if and only if for any $i\neq j$, $(A,\begin{bmatrix}B_i&B_j\end{bmatrix},C)$ is left invertible.
+
+  Similarly, with unknown initial conditions, the fault is identifiable if and only if for any $i\neq j$, $(A,\begin{bmatrix}B_i&B_j\end{bmatrix},C)$ has no invariant zeros.
+
+\section{Generic Detectability}
+
+We model a network composed of $m$ agents as a graph $G = \{V,\,E\}$. $V = \{1,2,\ldots,m\}$ is the set of vertices representing the agents. $E \subseteq V\times V$ is the set of edges. $(i,j)\in E$ if and only if $j$ can send information to $i$. \comment{The graph can be directed.}
+
+Define the neighbors $\mathcal N_i$ of agent $i$ as the set of agents who can send information to $i$, i.e.,
+\begin{displaymath}
+  \mathcal N_i \triangleq \{j:(i,j)\in E,\,j\neq i\}.
+\end{displaymath}
+
+Suppose each agent has a state $x_i(t)$. The agent update the state based on the following update equation:
+\begin{displaymath}
+  x_i(k+1) = a_{ii} x_i(k) + \sum_{j\in \mathcal N_i} a_{ij} x_j(k) + u_i(k),
+\end{displaymath}
+where $u_i(k)$ is a malicious input. A node is benign if $u_i(k)=0$ for all $k$. It is malicious if $u_i(k)\neq 0$ for some $k$.
+
+We can write the above equation in matrix form as:
+\begin{displaymath}
+  x(k+1) = A x(k) + Bu(k),
+\end{displaymath}
+where $B = \begin{bmatrix}e_{i_1},\dots,e_{i_f}\end{bmatrix}$, where $\{i_1,\dots,i_f\}$ are the set of malicious node. Furthermore, for node $i$, we can define
+\begin{align*}
+  C_i = \begin{bmatrix}
+    e_{i_1}\\
+    \vdots\\
+    e_{i_l} 
+  \end{bmatrix},
+\end{align*}
+where $\mathcal N_i \bigcup \{i\} = \{i_1,\dots,i_l\}$. As a result, for a benign node $i$, it observes
+\begin{align*}
+ y(k) = C_i x(k).
+\end{align*}
+
+One can see that there is a straight forward connection between the topology of the network and the graph associated with linear structured system $(A,B,C_i)$
+
+\begin{theorem}
+  (Assuming unknown initial condition:) If the graph $G$ has connectivity $k > f$, and $i$ be a benign node. Then for almost any $A,B$ matrices, node $i$ can detect the existence of a malicious behavior. On the other hand, if $k \leq f$, then there exists a set of malicious node $\{i_1,\dots,i_f\}$, such that no node can detect the malicious behavior for any $A,B$.
+\end{theorem}
+\end{document}
+
+
+
+
