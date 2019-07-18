@@ -1,0 +1,151 @@
+\documentclass{article}
+
+\usepackage{subfigure}
+\usepackage{amssymb, amsmath, amsfonts}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usetikzlibrary{external}
+\usepackage{pgfplots}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+
+\newlength\figureheight
+\newlength\figurewidth
+
+\ifnum\pdfshellescape=1
+\tikzexternalize[prefix=tikzpdf/]
+\fi
+
+\newcommand{\tikzdir}[1]{tikz/#1.tikz}
+\newcommand{\inputtikz}[1]{\tikzsetnextfilename{#1}\input{\tikzdir{#1}}}
+
+\DeclareMathOperator*{\argmin}{arg\; min}     % argmin
+\DeclareMathOperator*{\argmax}{arg\; max}     % argmax
+\DeclareMathOperator*{\tr}{tr}     % trace
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\logdet}{log\;det}
+
+\title{Event-Based Estimation}
+
+\author{Yilin Mo}
+
+\begin{document} \maketitle
+
+\section{Problem Formulation}
+Let $x\in \mathbb R^n$ be the state, such that $x~\mathcal N(\bar,\Sigma)$. $y\in \mathbb R^m$ is the sensor measurement, where $y_i$ is the measurement from the $i$th sensor, such that
+\begin{displaymath}
+ y_i = a_i x + v_i.
+\end{displaymath}
+Assume that $x,v_1,\dots,v_m$ are all linearly independent and $v_i\sim \mathcal N(0,r_i)$. 
+
+Let $\gamma_i$ be a binary variable, such that $\gamma_i = 0$ if the sensor is not selected. $\gamma_i = 1$ if the sensor is selected.
+
+In the previous lecture, we consider $\gamma_i$ to be independent from $y_i$. 
+
+In this lecture, we will assume $\gamma_i$ depends on $y_i$.
+
+Consider the sensors employ the following strategy:
+\begin{enumerate}
+  \item Each sensor randomly generates a uniformly distributed random variable $\xi_i$ on $[0,1]$.  
+  \item Sensor $i$ computes a function:
+    \begin{displaymath}
+      g_i(y_i) =\exp\left( -\frac{y_i^2}{2\delta_i} \right),
+    \end{displaymath}
+    where $\delta_i>0$ is a fixed parameter.
+  \item Sensor $i$ decides whether to send the measurement or not:
+    \begin{displaymath}
+      \gamma_i = \begin{cases}
+	0&\text{ if }\xi_i\leq g_i(y_i)\\
+	1&\text{ if }\xi_i> g_i(y_i)\\
+      \end{cases}
+    \end{displaymath}
+\end{enumerate}
+
+Define the information set $\mathcal I = \{\gamma_1,\dots,\gamma_m,\gamma_1y_1,\dots,\gamma_my_m\}$ and state estimation and the estimation error covariance matrix as $\hat x \triangleq \mathbb E(x|\mathcal I),P \triangleq \Cov(x|\mathcal I)$ respectively.
+
+\section{Optimal Estimator}
+Consider single sensor case. The joint probability of $x,y,\gamma$ satisfies
+\begin{align*}
+  &P(x\in X,y \in Y,\gamma = 0) = P(x\in X)P(y\in Y|x\in X)P(\gamma=0|y\in Y)\\
+  &= \int_{x\in X}\int_{y\in Y}  \frac{1}{\sqrt{(2\pi)^k|\Sigma|}}\exp\left( -\frac{1}{2}(x-\bar x)^T\Sigma^{-1}(x-\bar x) \right)\frac{1}{\sqrt{2\pi r}}\exp\left( -\frac{1}{2r}(y-a x)^2 \right)g(y)dxdy.
+\end{align*}
+Hence, 
+\begin{align*}
+  &P(x\in X,\gamma=0)=\alpha \int_{x\in X}\int_{y\in \mathbb R} \exp\left[-\frac{1}{2}\left( (x-\bar x)^T\Sigma^{-1}(x-\bar x)+ \frac{1}{r}(y-a x)^2 +\frac{1}{\delta} y^2\right)  \right]dxdy\\
+  &=\alpha\int_{x\in X}\exp\left[- \frac{1}{2}(x-\bar x)^T\Sigma^{-1}(x-\bar x) \right]\int_{y\in R}\exp\left[- \frac{1}{2} \left(\frac{1}{r}(y-ax)^2+\frac{1}{\delta}y^2\right) \right]dy dx
+\end{align*}
+Since
+\begin{align*}
+  \frac{1}{r}(y-ax)^2+\frac{1}{\delta}y^2 &=\left(\frac{1}{r}+\frac{1}{\delta}\right) y^2 -\frac{2}{r}(ax)y+\frac{1}{r}(ax)^2 \\
+  &= \left[\sqrt{\frac{r+\delta}{r\delta}}\;y - \sqrt{\frac{\delta}{r(r+\delta)}}\;(ax)\right]^2 + \frac{1}{r+\delta}x^Ta^Tax.
+\end{align*}
+Hence,
+\begin{align*}
+  &P(x\in X,\gamma=0)=\beta \int_{x\in X} \exp\left[-\frac{1}{2}\left( (x-\bar x)^T\Sigma^{-1}(x-\bar x) + \frac{1}{r+\delta}x^Ta^Tax\right)  \right]dx\\
+  & = \lambda \int_{x\in X}\exp\left[ -\frac{1}{2}(x-\tilde x)\tilde P^{-1}(x-\tilde x) \right],
+\end{align*}
+where
+\begin{displaymath}
+  \tilde P = \left(\Sigma^{-1} + \frac{a^Ta}{r+\delta}\right)^{-1} = \Sigma - \Sigma a^T(a \Sigma a^T + r+\delta )^{-1} a\Sigma.
+\end{displaymath}
+and
+\begin{displaymath}
+  \tilde x = P \Sigma^{-1} \bar x = \bar x + \Sigma a^T(a\Sigma a^T + r+ \delta)^{-1}( 0 - a \bar x).
+\end{displaymath}
+Hence, if $P(x|\gamma = 0)$ is Gaussian distributed with mean $\tilde x$ and covariance $P$.
+
+On the other hand, 
+\begin{align*}
+  P(x\in X|y\in Y,\gamma = 1)& =  \frac{P(\gamma =1|x\in X,y\in Y)P(x\in X|y\in Y}{P(\gamma = 1|y\in Y)} = \frac{(1-g(y))P(x\in X|y\in Y)}{1-g(y)} \\
+  &= P(x\in X|y\in Y).
+\end{align*}
+
+Hence, $P(x|y,\gamma=1)$ is a Gaussian distribution with mean $\bar x + \Sigma a^T(a\Sigma a^T + r)^{-1}(y - a\bar x)$ and variance $P = (\Sigma^{-1}+a^Ta/r)^{-1}$.
+
+Therefore
+\begin{displaymath}
+  \hat x = \bar x + \Sigma a^T(a\Sigma a^T + r + (1-\gamma)\delta)^{-1}(\gamma y - a\bar x) ,
+\end{displaymath}
+and
+\begin{displaymath}
+   P = \left(\Sigma^{-1} + \frac{a^Ta}{r+(1-\gamma)\delta}\right)^{-1} 
+\end{displaymath}
+
+For multi-sensors, define 
+\begin{displaymath}
+ \Gamma = diag(\gamma_1,\dots,\gamma_m), \,\Delta =diag(\delta_1,\dots,\delta_m) .
+\end{displaymath}
+then
+\begin{displaymath}
+  \hat x = \bar x + \Sigma C^T(C\Sigma C^T + R + (I-\Gamma)\Delta)^{-1}(\Gamma y - C\bar x) ,
+\end{displaymath}
+and
+\begin{displaymath}
+  P = \left( \Sigma^{-1} +\sum_{i=1}^m \frac{a_i^Ta_i}{r_i+(1-\gamma_i)\delta_i}  \right)^{-1} = \Sigma - \Sigma C^T(C\Sigma C^T+R+(I-\Gamma)\Delta)^{-1}C\Sigma. 
+\end{displaymath}
+\section{Communication Rate}
+
+Consider single sensor case and assume that $\bar x=0$ Let us define the communication rate $\lambda = P(\gamma = 1)$. Then
+\begin{displaymath}
+ P(\gamma = 0) = \mathbb E\;P(\xi\leq g(y)|y) =\mathbb E g(y). 
+\end{displaymath}
+$y$ is Gaussian with mean $0$ and variance $r + a\Sigma a^T$. Hence,
+\begin{align*}
+  \mathbb E g(y) & = \frac{1}{\sqrt{2\pi(r+a\Sigma a^T)}}\int_{y\in \mathbb R}\exp\left[ - \frac{1}{2}\left(\frac{y^2}{r+a\Sigma a^T}  + \frac{y^2}{\delta} \right) \right]\\
+  &= \frac{1}{\sqrt{1+\frac{r+a\Sigma a^T}{\delta}}}.
+\end{align*}
+
+For multi sensor case,
+\begin{displaymath}
+ \lambda_i =  1-\frac{1}{\sqrt{1+\frac{r_i+a_i\Sigma a_i^T}{\delta_i}}}.
+\end{displaymath}
+
+\end{document}
+

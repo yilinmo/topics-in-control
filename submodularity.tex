@@ -1,0 +1,193 @@
+\documentclass{article}
+
+\usepackage{subfigure}
+\usepackage{amssymb, amsmath, amsfonts}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usetikzlibrary{external,matrix,arrows,fit,backgrounds,plotmarks,shapes.geometric}
+\usepackage{pgfplots}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+
+\newlength\figureheight
+\newlength\figurewidth
+
+\ifnum\pdfshellescape=1
+\tikzexternalize[prefix=tikzpdf/]
+\fi
+
+\newcommand{\tikzdir}[1]{tikz/#1.tikz}
+\newcommand{\why}{({\bf why?})}
+\newcommand{\inputtikz}[1]{\tikzsetnextfilename{#1}\input{\tikzdir{#1}}}
+\newcommand{\alert}[1]{\textcolor{red}{#1}}
+
+\DeclareMathOperator*{\argmin}{arg\; min}     % argmin
+\DeclareMathOperator*{\argmax}{arg\; max}     % argmax
+\DeclareMathOperator*{\tr}{tr}     % trace
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\logdet}{log\;det}
+\DeclareMathOperator{\der}{d}
+
+\title{Lecture 6: Sensor Selection}
+
+\author{Yilin Mo}
+\begin{document} \maketitle
+\section{Problem Formulation}
+Let $x\in \mathbb R^n$ be the state, such that $x~\mathcal N(0,\Sigma)$. $y\in \mathbb R^m$ is the sensor measurement, where $y_i$ is the measurement from the $i$th sensor, such that
+\begin{displaymath}
+ y_i = a_i x + v_i.
+\end{displaymath}
+Assume that $x,v_1,\dots,v_m$ are all linearly independent and $v_i\sim \mathcal N(0,1)$. (without loss of generality we can assume $\mathbb Ev_i^2 = 1$, why?)
+
+Let $\gamma_i$ be a binary variable, such that $\gamma_i = 0$ if the sensor is not selected. $\gamma_i = 1$ if the sensor is selected.
+
+Hence, the estimation covariance is given by
+\begin{displaymath}
+  P = \left( \Sigma^{-1} + \gamma_i \sum_i a_ia_i^T \right)^{-1}.
+\end{displaymath}
+
+Possible objective functions:
+\begin{itemize}
+  \item $\tr(P)$
+  \item $\logdet(P) = - \logdet( \Sigma^{-1} + \gamma_i \sum_i a_ia_i^T )$, $\logdet(X)$ is a concave function with respect to $X\in \mathbb S_+^n$.
+  \item Why not $P$?
+\end{itemize}
+Possible constrains:
+\begin{itemize}
+  \item sensor i is selected only when sensor j is selected: $\gamma_i \leq \gamma_j$
+  \item sensor i and j can not both be selection: $\gamma_i + \gamma_j \leq 1$
+  \item number constraints: $\sum_i \gamma_i \leq l$.
+  \item budget constraints: $\sum_i w_i \gamma_i \leq l$.
+\end{itemize}
+The main difficulty is that $\gamma_i$ is discrete. In general, sensor selection problem is NP-hard.
+\section{Convex Relaxation Based Approach}
+We consider the following problem:
+    \begin{align*}
+      &\mathop{\textrm{minimize}}\limits_{\gamma_1,\dots,\gamma_m}&
+      & \tr( P^{-1})\nonumber\\
+      &\textrm{subject to}&
+      & \sum_i \gamma_i\leq l\\
+      &&&\gamma_i \in\{0,1\}
+    \end{align*}
+A standard way to deal with binary variables is to relax it to a real number. 
+
+{\bf Relaxed Problem:}
+    \begin{align*}
+      &\mathop{\textrm{minimize}}\limits_{\gamma_1,\dots,\gamma_m}&
+      & \tr( P^{-1})\nonumber\\
+      &\textrm{subject to}&
+      & \sum_i \gamma_i\leq l\\
+      &&&0\leq \gamma_i \leq 1
+    \end{align*}
+
+Let the solution of the relaxed problem be $\gamma_1^*,\dots,\gamma_m^*$. We can quantize the real $\gamma_1^*,\dots$ to a binary $\gamma_1,\dots,\gamma_m$. Let the solution of the original problem be $\gamma_1^o,\dots,\gamma_m^o$. Hence
+\begin{displaymath}
+  \tr(P^{-1}(\gamma^*)) \leq  \tr(P^{-1}(\gamma^o))\leq  \tr(P^{-1}(\gamma)).
+\end{displaymath}
+As a result, we have an estimate on how good our approximation is.
+\section{Submodularity}
+Let $S$ be a set and $f:2^S\rightarrow \mathbb R$ be a function.
+
+The function is called monotone if for all $A\subseteq B\subseteq S$, 
+\begin{displaymath}
+ f(A) \leq f(B). 
+\end{displaymath}
+
+The function is called submodular if for any $A,B\subseteq S$,
+\begin{displaymath}
+ f(A\cap B)+f(A\cup B)\leq f(A) + f(B). 
+\end{displaymath}
+Equivalently, if $A\subseteq B$ and $i\notin B$, then
+\begin{displaymath}
+  f(A\cup \{i\})-f(A)\geq f(B\cup \{i\})-f(B).
+\end{displaymath}
+
+Examples of monotone and submodular functions:
+\begin{itemize}
+  \item $f(S) = \sqrt{|S|}$ .
+  \item Linear function: assume that every $i\in S$ has a weight $w_i$, $f(A)  = \sum_{i\in A} w_i$.
+  \item Coverage function: Let X be a weighted set and $X_i\subseteq X$ for $i=1,\dots,n$. Let $S = \{1,\dots,n\}$. Then the following function is submodular:
+    \begin{displaymath}
+      f(A) = \sum_{x\in \bigcup_{i\in A}X_i } w(x).
+    \end{displaymath}
+\end{itemize}
+
+Let $Y = [y_1,\dots,y_m]$. Let $A = \{i_1,\dots,i_l\}\subseteq\{1,\dots,m\}$ and $Y_A = [y_{i_1},\dots,y_{i_l}]$. Define the mutual information 
+\begin{displaymath}
+  I(X;Y_A) = h(X) - h(X|Y_A). 
+\end{displaymath}
+In general, this function is monotone but not increasing. Counterexample: $y_1,y_2$ are Bernoulli with $P(y_i = 1) = 0.5$ and $X = y_1 \text{XOR} y_2$. Then $X$ is independent of $y_1$ and $X$ is independent of $y_2$. Hence,
+\begin{displaymath}
+  f(\emptyset) = f(\{1\}) = f(\{2\}) = 0, \, f(\{1,2\}) = 1. 
+\end{displaymath}
+However, if $y_i$s are conditionally independent, i.e., 
+\begin{displaymath}
+ P(y_1,\dots,y_m|X) = \prod_i P(y_i|X),
+\end{displaymath}
+then the mutual information is monotone submodular.
+
+\subsection{Maximizing a Monotone Submodular Function}
+Consider the following problem:
+\begin{align*}
+  &\mathop{\textrm{maximize}}\limits_{A\subset S}&
+  & f(A)\\
+  &\textrm{subject to}&
+  & |A|\leq l\\
+\end{align*}
+Define the optimal $A$ for the above problem to be $A^*$. This problem is in general NP-hard. However, we have a greedy algorithm:
+\begin{enumerate}
+  \item Let $A_0 = \emptyset$.
+  \item Find $s = \argmax_{s\in S} f(A_i\cup\{s\})$. Get $A_{i+1} = A_i \cup \{s\}$.
+  \item Iterate until we get $A_k$.
+\end{enumerate}
+
+\begin{theorem}
+  Let $f$ be a non-negative monotone submodular function, then
+  \begin{displaymath}
+   f(A_l) \geq (1-e)f(A^*) 
+  \end{displaymath}
+\end{theorem}
+\begin{proof}
+  Let $A^* = \{s_1,\dots,s_k\}$. Hence,
+  \begin{displaymath}
+    f(A^*)\leq f(A^*\cup A_i) \leq f(A_i) + \sum_{s_i\in A^*} (f(A_i\cup\{s_i\})-f(A_i))\leq f(A_i) + k (f(A_{i+1}) - f(A_i)),
+  \end{displaymath}
+ which is equivalent to
+ \begin{displaymath}
+   f(A^*) - f(A_{i+1}) \leq  \left( 1-\frac{1}{k} \right)(f(A^*) - f(A_i)).
+ \end{displaymath}
+ Hence,
+ \begin{displaymath}
+   f(A^*) - f(A_k) \leq \left( 1-\frac{1}{k} \right)^k (f(A^*)-f(A_0)) \leq \frac{1}{e} f(A^*). 
+ \end{displaymath}
+ The last inequality holds since $1-1/k \leq e^{-1/k}$.
+\end{proof}
+\subsection{Greedy Sensor Selection}
+For a Gaussian distribution $\mathcal N(0,\Sigma)$, the entropy is given by
+\begin{displaymath}
+  \frac{k}{2}(1+\log(2\pi))+\frac{1}{2}\logdet \Sigma ,
+\end{displaymath}
+where $k$ is the dimension of the Gaussian variable. For our case, the mutual information between $x$ and $Y_A$ is
+\begin{displaymath}
+  \frac{1}{2}\logdet \Sigma - \frac{1}{2}\logdet P. 
+\end{displaymath}
+Hence, we can solve the following problem using the greedy algorithm:
+    \begin{align*}
+      &\mathop{\textrm{minimize}}\limits_{\gamma_1,\dots,\gamma_m}&
+      & \logdet P\nonumber\\
+      &\textrm{subject to}&
+      & \sum_i \gamma_i\leq l\\
+      &&& \gamma_i \in[0, 1]
+    \end{align*}
+
+
+\end{document}
+
+

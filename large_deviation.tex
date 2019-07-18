@@ -1,0 +1,171 @@
+\documentclass{article}
+
+\usepackage{subfigure}
+\usepackage{amssymb, amsmath, amsfonts}
+\usepackage{amsthm}
+\usepackage{tikz}
+\usetikzlibrary{external}
+\usepackage{pgfplots}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+
+\newlength\figureheight
+\newlength\figurewidth
+
+\ifnum\pdfshellescape=1
+\tikzexternalize[prefix=tikzpdf/]
+\fi
+
+\newcommand{\tikzdir}[1]{tikz/#1.tikz}
+\newcommand{\inputtikz}[1]{\tikzsetnextfilename{#1}\input{\tikzdir{#1}}}
+
+\DeclareMathOperator*{\argmin}{arg\; min}     % argmin
+\DeclareMathOperator*{\argmax}{arg\; max}     % argmax
+\DeclareMathOperator*{\tr}{tr}     % trace
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\logdet}{log\;det}
+
+\title{Distributed Hypothesis Testing}
+
+\author{Yilin Mo}
+
+\begin{document} \maketitle
+
+We model a network composed of $n$ agents as a graph $G = \{V,\,E\}$. $V = \{1,2,\ldots,n\}$ is the set of vertices representing the agents. $E \subseteq V\times V$ is the set of edges. $(i,j)\in E$ if and only if sensor $i$ and $j$ can communicate directly with each other. We will always assume that $G$ is undirected, i.e. $(i,j)\in E$ if and only if $(j,i)\in E$. We further assume that there is no self loop, i.e., $(i,i)\notin E$.
+
+At each time, each sensor make an i.i.d. measurement $y_i(k)$. Consider the following two hypothesis:
+\begin{itemize}
+  \item[H0]: $y_i(k) \sim \mathcal N(0,1)$.
+  \item[H1]: $y_i(k) \sim \mathcal N(1,1)$.
+\end{itemize}
+We assume that each hypothesis is true with 0.5 probability.
+
+\section{Centralized Detector}
+The optimal centralized detector is a Naive Bayes detector. Define the average to be
+\begin{displaymath}
+  \alpha(k) = \frac{1}{n(k+1)}\sum_{t=0}^k \sum_{i=1}^n y_i(k).
+\end{displaymath}
+Hence, the centralized detector is
+\begin{displaymath}
+  f(\alpha(k)) = \begin{cases}
+    0&\text{ if }\alpha(k)\leq 0.5\\
+    1&\text{ if }\alpha(k)> 0.5\\
+  \end{cases}
+\end{displaymath}
+Define the probability of error of such detector to be $P_c(k)$, then
+\begin{displaymath}
+ P_c(k) = 0.5 P(\alpha(k)\leq 0.5|H_1) + 0.5 P(\alpha(k)> 0.5|H_0) = P(\alpha(k)> 0.5|H_0)
+\end{displaymath}
+
+We use large deviation theory to characterize $P_c(k)$. Suppose $x_i(k)\sim \mathcal N(0,1)$, then the moment generating function is given by
+\begin{displaymath}
+  M(\theta) = \int_{-\infty}^\infty \exp(\theta t) \frac{1}{\sqrt{2\pi}}\exp\left( -\frac{t^2}{2} \right)dt =  \exp\left( \frac{\theta^2}{2} \right)\int_{-\infty}^\infty  \frac{1}{\sqrt{2\pi}}\exp\left( -\frac{(t-\theta)^2}{2} \right)dt  = \exp\left( \frac{\theta^2}{2} \right).
+\end{displaymath}
+
+Hence, the log-moment generating function is 
+\begin{displaymath}
+  \Lambda(\theta) = \log M(\theta) = \frac{\theta^2}{2},
+\end{displaymath}
+and
+\begin{displaymath}
+  I(0.5) = \sup_{\theta} 0.5\theta - \Lambda(\theta) = \frac{1}{8}. 
+\end{displaymath}
+
+Hence, we know that $P_c(k)\sim~\exp(-nk/8)$.
+
+\section{Distributed Detection}
+Let $A$ be a consensus matrix that is compatible with the topology $G$, such that
+\begin{itemize}
+  \item $A$ has an eigenvalue of $1$ and all the other eigenvalues of $A$ are strictly inside the unit disk.
+  \item $\mathbf 1$ is both a left and right eigenvector of $A$.
+\end{itemize}
+
+Define $J = \mathbf 1\mathbf 1^T/n$, then $A^k\rightarrow J$ as $k\rightarrow \infty$. 
+
+Define the state of sensor $i$ at time $k$ to be $x_i(k)$. The sensor update equation can be written as
+\begin{align*}
+  x_i(k)^+  &= \frac{k}{k+1}x_i(k) + \frac{1}{k+1}y_i(k),\\
+  x_i(k+1) &= a_{ii}x_i(k)^+ + \sum_{j\in N_i}a_{ij}x_j(k)^+.
+\end{align*}
+
+Hence,
+\begin{align*}
+  x(k)^+  &= \frac{k}{k+1}x(k) + \frac{1}{k+1}y(k),\\
+  x(k+1) &= Ax(k)^+.
+\end{align*}
+
+Let us define 
+\begin{displaymath}
+ \bar x(k+1) = Jx(k+1) = \alpha(k) \mathbf 1.
+\end{displaymath}
+
+For each sensor, it implements a detector $f_i$, which is defined as
+\begin{displaymath}
+  f_i(x_i(k)) =\begin{cases}
+    0&\text{ if }x_i(k)\leq 0.5\\
+    1&\text{ if }x_i(k)> 0.5\\
+  \end{cases}
+\end{displaymath}
+Denote the probability of error for each individual detector as $P_i(k)$. By symmetry, we know that
+\begin{displaymath}
+ P_i(k) = P(x_i(k) \geq 0.5|H_0).
+\end{displaymath}
+
+Clearly $x_i(k)< 0.5$ if $\alpha(k-1) <0.5-\delta$ and $x_i(k)-\alpha(k-1)<\delta$, for any $\delta > 0$. Hence,
+\begin{displaymath}
+ P_i(k) = P(\alpha(k-1) \geq 0.5-\delta|H_0) + P(x_i(k)-\alpha(k-1)\geq \delta|H_0).
+\end{displaymath}
+
+For the first probability, we know that 
+\begin{displaymath}
+  I(0.5-\delta) = \sup_{\theta} (0.5-\delta)\theta - 0.5\theta^2 = 0.125+\varepsilon,
+\end{displaymath}
+where $\varepsilon \rightarrow 0$ when $\delta \rightarrow 0$. Hence, $P(\alpha(k-1) \geq 0.5-\delta|H_0)\sim \exp(-(0.125+\varepsilon)nk)$.
+
+Now let us look at $k(x_i(k) - \alpha(k-1))$. We know that
+\begin{displaymath}
+ k( x(k) - \bar x(k) )= \left[(A-J)y(k-1) +  (A-J)^2y(k-2) + \dots + (A-J)^{k} y(0)\right].
+\end{displaymath}
+
+Hence, under hypothesis $H_0$, $k(x(k) - \bar x(k))$ is Gaussian distributed with zero mean and with covariance:
+\begin{displaymath}
+  (A-J)(A-J)^T + \dots + (A-J)^{k+1} \left( (A-J)^{k+1} \right)^T \leq M.
+\end{displaymath}
+
+Therefore, $k(x_i(k)-\alpha(k-1))$ is Gaussian distributed with zero mean and a bounded variance. 
+\begin{displaymath}
+  P(x_i(k)-\alpha(k-1)\geq \delta| H_0) =\frac{1}{\sqrt{2\pi}} \int_{k\delta/\sigma(k)}^\infty \exp\left(-\frac{t^2}{2}\right)dt,
+\end{displaymath}
+where $\sigma(k)$ is the standard deviation of $k(x_i(k)-\alpha(k-1))$.
+
+For any $x > 0$, we have that
+\begin{displaymath}
+  \frac{1}{\sqrt{2\pi}} \int_{x}^\infty \exp\left(-\frac{t^2}{2}\right)dt \leq \frac{1}{\sqrt{2\pi}} \int_{x}^\infty\frac{t}{x} \exp\left(-\frac{t^2}{2}\right)dt \leq \frac{1}{x\sqrt{2\pi}}\exp\left( -\frac{x^2}{2} \right).
+\end{displaymath}
+
+Therefore, for large enough $k$
+\begin{displaymath}
+  P(x_i(k)-\alpha(k-1)\geq \delta| H_0) \leq \exp\left( -\frac{1}{2M_{ii}}k^2\delta^2 \right).
+\end{displaymath}
+
+Hence, one can prove that for any $\varepsilon > 0$, and large enough $k$,
+\begin{displaymath}
+ P_i(k)\leq \exp\left( -(0.125+\varepsilon)nk \right).
+\end{displaymath}
+On the other hand, $P_i(k) \geq P_c(k)$, which implies that
+\begin{displaymath}
+ P_i(k)\geq \exp\left( -(0.125-\varepsilon)nk \right).
+\end{displaymath}
+
+Hence, $n/8$ is the rate function for $P_i(k)$.
+\end{document}
+
+
+
