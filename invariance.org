@@ -130,5 +130,6 @@ Suppose that the maximal controlled invariant subspace contained in $Ker(C)$ is 
 $$Ax + Bu = \lambda x,\,Cx = 0,$$
 which implies that $\begin{bmatrix}A-\lambda I&B\\C&0\end{bmatrix}$ has a non-trivial kernel.
 
+* References and Further Readings
 
-
+to be done
